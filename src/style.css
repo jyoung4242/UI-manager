@@ -1,0 +1,40 @@
+/*style.css*/
+.box1 {
+    width: 25px;
+    aspect-ratio: 1/1;
+    position: fixed;
+    top: 190px;
+    left: 20px;
+    background-color: black;
+    border-radius: 3px;
+}
+
+.box2 {
+    width: 50px;
+    aspect-ratio: 1/1;
+    position: fixed;
+    top: 50px;
+    left: 75px;
+    background-color: red;
+    border-radius: 8px;
+}
+
+.circ1 {
+    width: 30px;
+    aspect-ratio: 1/1;
+    position: fixed;
+    top: 80px;
+    left: 125px;
+    background-color: orange;
+    border-radius: 50%;
+}
+
+.circ2 {
+    width: 65px;
+    aspect-ratio: 1/1;
+    position: fixed;
+    top: 180px;
+    left: 225px;
+    background-color: purple;
+    border-radius: 50%;
+}
