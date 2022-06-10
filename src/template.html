@@ -5,10 +5,20 @@
         <title>UI-Manager</title>
     </head>
     <body>
-        <p class="text">Update text goes here</p>
-        <div id="unit1" class="box1"></div>
-        <div id="unit2" class="box2"></div>
-        <div id="unit3" class="circ1"></div>
-        <div id="unit4" class="circ2"></div>
+        <div class="control">
+            <button id="events">Start Stop Events</button>
+            <button id="que">Start Stop Queue</button>
+            <button id="log">Send log to console</button>
+            <button id="user" class="hidden">Click!!!!</button>
+        </div>
+        <div class="widgets">
+            <div id="unit0" class="box1"></div>
+            <div id="unit1" class="box2"></div>
+            <div id="unit2" class="circ1"></div>
+            <div id="unit3" class="circ2"></div>
+        </div>
+        <div class="text">
+            <textarea name="textarea" id="mytext" cols="1" rows="30"></textarea>
+        </div>
     </body>
 </html>

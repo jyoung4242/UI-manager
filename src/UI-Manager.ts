@@ -1,5 +1,6 @@
 export class UIManager {
     queue: Function[] = [];
+    params: any[] = [];
     index: number = 0;
     debugLog: string[] = [];
     isDebugging: boolean = false;
@@ -7,6 +8,8 @@ export class UIManager {
     speed: number;
     myInterval: NodeJS.Timer;
     ifStepping: boolean = false;
+    ifUILock: boolean = false;
+    UID: string = '';
 
     constructor(speed?: number, enabled?: boolean, debug?: boolean) {
         this.speed = speed ?? 1000;
@@ -14,8 +17,20 @@ export class UIManager {
         this.isRunning = enabled ?? false;
     }
 
-    addQue = (entry: Function) => {
-        this.queue.push(entry);
+    addQue = (entry: Function, params: any[]) => {
+        //check for locking code
+        if (entry.name.search('UI_') == -1) {
+            this.queue.push(entry);
+            this.params.push(params);
+        } else {
+            if (!this.ifUILock) {
+                this.queue.push(entry);
+                this.params.push(params);
+            } else {
+                console.log(`UI lock event blocked`);
+            }
+        }
+        console.log(`que length: `, this.queue.length);
     };
 
     stepQue = () => {
@@ -31,15 +46,39 @@ export class UIManager {
         this.isRunning = flag;
     };
 
+    getQue = () => {
+        return this.queue;
+    };
+
+    clearLock = (lockID: string, entry: Function, params: any[]) => {
+        if (lockID == this.UID) {
+            this.ifUILock = false;
+        }
+        entry(...params);
+    };
+
+    lockUI = (entry: Function, params: any[]): string => {
+        entry(...params);
+        this.ifUILock = true;
+        this.UID = Date.now().toString();
+        return this.UID;
+    };
+
+    getUID = (): string => {
+        return this.UID;
+    };
+
     startQue = () => {
         this.myInterval = setInterval(async () => {
-            if (this.isRunning) {
-                const asyncFunctions = this.queue;
-                this.queue = [];
-                for (const asyncFn of asyncFunctions) {
-                    let result = await asyncFn();
+            if (this.isRunning && !this.ifUILock) {
+                while (this.queue.length) {
+                    //check for UI event
+                    let currentFunc = this.queue.shift();
+                    let currentParam: any[] = this.params.shift();
+
+                    await currentFunc(...currentParam);
                     if (this.isDebugging) {
-                        this.log(`UI-QUE RAN ${asyncFn} at ${Date.now()} with result: ${result}`);
+                        this.log(`UI-QUE RAN ${currentFunc.name} at ${Date.now()}`);
                     }
                 }
 
