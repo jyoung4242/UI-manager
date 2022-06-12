@@ -1,7 +1,7 @@
 import './style.css';
 import { UIManager } from './UI-Manager';
 
-let UIM = new UIManager(500, true, true);
+let UIM = new UIManager(1000, true, false);
 
 let eventToggle: boolean = false;
 let queToggle: boolean = false;
@@ -48,7 +48,7 @@ const hideButton = () => {
     txtArea.innerHTML = '';
 };
 
-const sleep = (t: number) => {
+const sleep = async (t: number) => {
     return new Promise((resolve, reject) => {
         setTimeout(() => {
             resolve('I can sleep!');
@@ -66,53 +66,68 @@ const random = (limit: number): number => {
     return Math.floor(Math.random() * limit);
 };
 
-const moveWidget = (element: string) => {
-    document.getElementById(element).style.transform = `translateX(${random(500)}px) translateY(${random(300)}px) scale(1)`;
-    sleep(1000);
+const moveWidget = async (element: string) => {
+    //document.getElementById(element).style.transform = `translateX(${random(500)}px) translateY(${random(300)}px) scale(1)`;
+    let promise = new Promise(async (resolve, reject) => {
+        await sleep(2000);
+        resolve('');
+    });
+    return promise;
 };
 
-const scaleWidget = (element: string) => {
-    document.getElementById(element).style.transform = `translateX(${random(500)}px) translateY(${random(300)}px) scale(${random(Math.random() * 3)})`;
-    sleep(1000);
+const scaleWidget = async (element: string) => {
+    //document.getElementById(element).style.transform = `translateX(${random(500)}px) translateY(${random(300)}px) scale(${random(Math.random() * 3)})`;
+    let promise = new Promise(async (resolve, reject) => {
+        await sleep(2500);
+        resolve('');
+    });
+    return promise;
 };
 
-const colorWidget = (element: string) => {
-    let newcolor = getRndColor();
-
-    document.getElementById(element).style.backgroundColor = `${newcolor}`;
-    sleep(1000);
+const colorWidget = async (element: string) => {
+    //let newcolor = getRndColor();
+    //document.getElementById(element).style.backgroundColor = `${newcolor}`;
+    let promise = new Promise(async (resolve, reject) => {
+        await sleep(3000);
+        resolve('');
+    });
+    return promise;
 };
 
-const opacWidget = (element: string) => {
-    document.getElementById(element).style.opacity = `${Math.random()}`;
-    sleep(1000);
+const opacWidget = async (element: string) => {
+    //document.getElementById(element).style.opacity = `${Math.random()}`;
+    let promise = new Promise(async (resolve, reject) => {
+        await sleep(4000);
+        resolve('');
+    });
+    return promise;
 };
 
 const showButton = () => {
     document.getElementById('user').classList.remove('hidden');
 };
 
-const createEvent = () => {
+const createEvent = async () => {
     //type of Event, move, scale, color, opacity
-    let selectedWidget = `unit${Math.floor(Math.random() * 4)}`;
+    let selectedWidget = `unit${Math.floor(Math.random() * 3)}`;
 
     let event = Math.floor(Math.random() * 5);
     switch (event) {
         case 0:
             //move
-            UIM.addQue(moveWidget, [selectedWidget]);
+            await UIM.addQue(moveWidget, [selectedWidget]);
             break;
         case 1:
             //scale
-            UIM.addQue(scaleWidget, [selectedWidget]);
+            await UIM.addQue(scaleWidget, [selectedWidget]);
             break;
         case 2:
             //color
-            UIM.addQue(colorWidget, [selectedWidget]);
+            await UIM.addQue(colorWidget, [selectedWidget]);
             break;
         case 3:
             //opacity
-            UIM.addQue(opacWidget, [selectedWidget]);
+            await UIM.addQue(opacWidget, [selectedWidget]);
             break;
         case 4:
             cntUIEvents += 1;
@@ -126,16 +141,28 @@ const createEvent = () => {
     }
 };
 
-setInterval(() => {
-    if (eventToggle) {
-        createEvent();
-    }
+let generationCount = 0;
 
-    let arryFunc: Function[] = UIM.getQue();
-    arryFunc.forEach(event => {
-        txtArea.innerHTML = txtArea.innerHTML + event.name + '\n';
-        txtArea.scrollTop = txtArea.scrollHeight;
-    });
-}, 500);
+createEvent();
+createEvent();
+createEvent();
+createEvent();
+
+console.log(UIM.getQue());
+
+setTimeout(() => {
+    console.log(`running 2nd batch`);
+    createEvent();
+    createEvent();
+    console.log(UIM.getQue());
+}, 8000);
+
+setTimeout(() => {
+    console.log(`running 3rd batch`);
+    createEvent();
+    createEvent();
+    createEvent();
+    console.log(UIM.getQue());
+}, 15000);
 
 UIM.startQue();

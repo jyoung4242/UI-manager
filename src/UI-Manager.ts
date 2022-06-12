@@ -10,6 +10,10 @@ export class UIManager {
     ifStepping: boolean = false;
     ifUILock: boolean = false;
     UID: string = '';
+    ifPurgeLock: boolean = false;
+    activeque: Function[] = [];
+    activeParams: any[] = [];
+    ifAddLock: boolean = false;
 
     constructor(speed?: number, enabled?: boolean, debug?: boolean) {
         this.speed = speed ?? 1000;
@@ -17,20 +21,24 @@ export class UIManager {
         this.isRunning = enabled ?? false;
     }
 
-    addQue = (entry: Function, params: any[]) => {
-        //check for locking code
-        if (entry.name.search('UI_') == -1) {
-            this.queue.push(entry);
-            this.params.push(params);
-        } else {
-            if (!this.ifUILock) {
+    addQue = async (entry: Function, params: any[]) => {
+        let promise = new Promise(resolve => {
+            //check for locking code
+            this.ifAddLock = true;
+            if (entry.name.search('UI_') == -1) {
                 this.queue.push(entry);
                 this.params.push(params);
             } else {
-                console.log(`UI lock event blocked`);
+                if (!this.ifUILock) {
+                    this.queue.push(entry);
+                    this.params.push(params);
+                } else {
+                    console.log(`UI lock event blocked`);
+                }
             }
-        }
-        console.log(`que length: `, this.queue.length);
+            this.ifAddLock = false;
+            resolve('');
+        });
     };
 
     stepQue = () => {
@@ -70,17 +78,29 @@ export class UIManager {
 
     startQue = () => {
         this.myInterval = setInterval(async () => {
-            if (this.isRunning && !this.ifUILock) {
-                while (this.queue.length) {
-                    //check for UI event
-                    let currentFunc = this.queue.shift();
-                    let currentParam: any[] = this.params.shift();
+            if (this.isRunning && !this.ifUILock && !this.ifPurgeLock && !this.ifAddLock) {
+                //append queus over
+                this.activeque.push(...this.queue);
+                this.activeParams.push(...this.params);
+                this.activeque.forEach(item => {
+                    this.queue.shift();
+                    this.params.shift();
+                });
 
+                while (this.activeque.length) {
+                    this.ifPurgeLock = true;
+                    //check for UI event
+                    let currentFunc = this.activeque.shift();
+                    let currentParam: any[] = this.activeParams.shift();
+                    console.log(`Running: `, currentFunc.name);
+                    console.time();
                     await currentFunc(...currentParam);
+                    console.timeEnd();
                     if (this.isDebugging) {
                         this.log(`UI-QUE RAN ${currentFunc.name} at ${Date.now()}`);
                     }
                 }
+                this.ifPurgeLock = false;
 
                 if (this.ifStepping) {
                     this.isRunning = false;
